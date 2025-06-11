@@ -12,6 +12,7 @@ djangorestframework==3.14.0
 djangorestframework-simplejwt==5.2.2
 drf-spectacular==0.28.0
 drf-yasg==1.21.5
+gunicorn==23.0.0
 idna==3.4
 importlib-metadata==8.7.0
 inflection==0.5.1
