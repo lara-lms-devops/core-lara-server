@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: corelara-api
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn coreLaraServer.wsgi:application
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: DJANGO_ALLOWED_HOSTS
+        value: corelara-api.onrender.com
+      - fromDatabase:
+          name: corelara-db
+          property: connectionString
+          key: DATABASE_URL
+
+databases:
+  - name: corelara-db
+    plan: free
