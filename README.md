@@ -34,7 +34,7 @@ O projeto ainda está em desenvolvimento e as próximas atualizações serão vo
 
 ## 🔗 Pré-requisitos
 
-#### Antes de começar, verfique se você possui as ferramentas necessárias:
+### Antes de começar, verfique se você possui as ferramentas necessárias
 
 -   **[MYSQL](https://dev.mysql.com/doc/mysql-getting-started/en/)**
 -   **[Python3](https://realpython.com/installing-python/)**
