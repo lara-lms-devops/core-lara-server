@@ -30,7 +30,7 @@ jobs:
           --health-retries=5
 
     env:
-      # >>> Variáveis que seu settings.py espera <<<
+      # Variables for local testing
       DB_NAME: testdb
       DB_USER: postgres
       DB_PASSWORD: postgres
@@ -71,8 +71,19 @@ jobs:
       - name: Run migrations (test DB)
         run: python manage.py migrate --noinput
 
-      - name: Run tests
-        run: python manage.py test --verbosity 2
+      - name: Run tests with coverage
+        run: |
+          coverage run --source=coreLaraServer manage.py test --verbosity 2
+          coverage report -m --fail-under=80
+
+      - name: Generate HTML Coverage Report
+        run: coverage html
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html
+          path: htmlcov
 
   deploy:
     name: Trigger Render deploy
