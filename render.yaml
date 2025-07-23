@@ -16,6 +16,26 @@ services:
         fromDatabase:
           name: corelara-db
           property: connectionString
+      - key: DB_NAME
+        fromDatabase:
+          name: corelara-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: corelara-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: corelara-db
+          property: password
+      - key: DB_HOST
+        fromDatabase:
+          name: corelara-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: corelara-db
+          property: port
 
 databases:
   - name: corelara-db
