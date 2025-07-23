@@ -1,17 +1,93 @@
-name: Deploy to Render
+name: Test & Deploy to Render
 
 on:
   push:
     branches:
       - main
 
+concurrency:
+  group: deploy-main
+  cancel-in-progress: false
+
 jobs:
-  deploy:
+  test:
+    name: Run Django tests
     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d testdb"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
-      - name: Trigger Render Deploy
-        run: curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
+    env:
+      # >>> Variáveis que seu settings.py espera <<<
+      DB_NAME: testdb
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_HOST: localhost
+      DB_PORT: "5432"
+
+      DEBUG: "False"
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1
+      SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY || 'insecure-ci-key' }}
+      # DJANGO_SETTINGS_MODULE: coreLaraServer.settings  # só descomente se necessário
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Wait for Postgres (health check already configured, but wait a bit)
+        run: |
+          for i in {1..20}; do
+            pg_isready -h localhost -p 5432 -U postgres -d testdb && break
+            sleep 1
+          done
+
+      - name: Run migrations (test DB)
+        run: python manage.py migrate --noinput
+
+      - name: Run tests
+        run: python manage.py test --verbosity 2
+
+  deploy:
+    name: Trigger Render deploy
+    needs: test
+    runs-on: ubuntu-latest
+    if: ${{ needs.test.result == 'success' }}
+
+    steps:
+      - name: Trigger Render Deploy Hook
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK" ]; then
+            echo "RENDER_DEPLOY_HOOK secret not set!" >&2
+            exit 1
+          fi
+          curl -fsSL -X POST "$RENDER_DEPLOY_HOOK"
+          echo "Deploy triggered."
