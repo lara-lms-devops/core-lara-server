@@ -113,7 +113,7 @@ jobs:
     name: Trigger Render deploy
     needs: test
     runs-on: ubuntu-latest
-    if: ${{ needs.test.result == 'success' }}
+    if: github.event_name == 'push' && success()
 
     steps:
       - name: Trigger Render Deploy Hook
