@@ -98,7 +98,7 @@ jobs:
       - name: Run tests with coverage
         run: |
           coverage run --source=coreLaraServer manage.py test --verbosity 2
-          coverage report -m --fail-under=80
+          coverage report -m --fail-under=90
 
       - name: Generate HTML Coverage Report
         run: coverage html
