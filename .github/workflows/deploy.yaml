@@ -1,4 +1,4 @@
-name: CI/CD – Lint, Testes e Deploy para Render
+name: Deploy para Render
 
 on:
   push:
