@@ -30,19 +30,25 @@ jobs:
       #     flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
       #     flake8 . --count --max-complexity=10 --max-line-length=127 --statistics || true
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install flake8
+      # - name: Install dependencies
+      #   run: |
+      #     python -m pip install --upgrade pip
+      #     pip install flake8
 
       - name: Run flake8 with reviewdog
         uses: reviewdog/action-flake8@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+
+          flake8_args: "--max-line-length=127 --max-complexity=10 ."
+
           reporter: github-pr-check   # mostra como "Check" na PR
           # reporter: github-pr-review  # alternativa: comentários em linha como review
           level: error                # level: [info, warning, error]
-          flake8_flags: "--max-line-length=127 --max-complexity=10"
+
+          filter_mode: nofilter
+          fail_on_error: true   # se tiver erro acima do fail_level => job FAIL
+          fail_level: error     # a partir de "error" o job falha
 
   test:
     name: Testes automatizados com cobertura (Django + Coverage)
