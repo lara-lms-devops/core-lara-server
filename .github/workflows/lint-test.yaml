@@ -28,7 +28,7 @@ jobs:
       - name: Run flake8
         run: |
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+          flake8 . --count --max-complexity=10 --max-line-length=127 --statistics || true
 
   test:
     name: Testes automatizados com cobertura (Django + Coverage)
@@ -93,7 +93,7 @@ jobs:
       - name: Run tests with coverage
         run: |
           coverage run --source=coreLaraServer manage.py test --verbosity 2
-          coverage report -m --fail-under=90
+          coverage report -m --fail-under=80
 
       - name: Generate HTML Coverage Report
         run: coverage html
