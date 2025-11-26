@@ -13,6 +13,10 @@ jobs:
   lint:
     name: Lint (Flake8)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,10 +29,14 @@ jobs:
       - name: Install flake8
         run: pip install flake8
 
-      - name: Run flake8
-        run: |
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          flake8 . --count --max-complexity=10 --max-line-length=127 --statistics
+      - name: Run flake8 with reviewdog
+        uses: reviewdog/action-flake8@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+          level: warning
+          filter_mode: nofilter
+          flake8_args: "--max-line-length=127 --max-complexity=10"
 
   test:
     name: Testes automatizados com cobertura (Django + Coverage)
